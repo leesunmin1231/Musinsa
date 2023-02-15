@@ -1,4 +1,4 @@
-import { css } from "@emotion/react";
+import { css } from '@emotion/react';
 
 const globalStyle = css`
   html,
@@ -88,7 +88,7 @@ const globalStyle = css`
     font-size: 100%;
     font: inherit;
     vertical-align: baseline;
-    font-family: "Noto Sans KR", sans-serif;
+    font-family: 'Noto Sans KR', sans-serif;
     color: #333;
   }
   /* HTML5 display-role reset for older browsers */
@@ -120,7 +120,7 @@ const globalStyle = css`
   blockquote:after,
   q:before,
   q:after {
-    content: "";
+    content: '';
     content: none;
   }
   table {
