@@ -15,7 +15,7 @@ export default function CharactersPage() {
 }
 
 const Wrapper = styled.div`
-  width: 85%;
+  width: 88%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;

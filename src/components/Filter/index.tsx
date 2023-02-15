@@ -6,7 +6,7 @@ export default function Filter() {
   return <Wrapper>Filter</Wrapper>;
 }
 
-const Wrapper = styled.header`
+const Wrapper = styled.div`
   width: 100%;
   height: 50px;
   ${bodyFont};
