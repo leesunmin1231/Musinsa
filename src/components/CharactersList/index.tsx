@@ -7,6 +7,7 @@ import Character from './Character';
 import { getListKey } from '../../util/getListKey';
 import type { RequestError } from '../../types/Error';
 import type { CharacterType } from '../../types/CharacterType';
+import Loading from '../Loading';
 
 export default function CharactersList() {
   const [characters, setCharacters] = useState<CharacterType[]>([]);
@@ -18,11 +19,7 @@ export default function CharactersList() {
   });
   return (
     <Wrapper>
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
-        characters.map((character) => <Character key={getListKey()} detail={character} />)
-      )}
+      {isLoading ? <Loading /> : characters.map((character) => <Character key={getListKey()} detail={character} />)}
     </Wrapper>
   );
 }
