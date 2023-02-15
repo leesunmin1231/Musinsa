@@ -1,6 +1,6 @@
 export interface CharacterType {
   name: string;
-  aliases: string;
+  aliases: string[];
   title: string;
   books: string[];
   tvSeries: string[];

@@ -8,9 +8,9 @@ export default function Title() {
 
 const Wrapper = styled.header`
   width: 100%;
-  height: 80px;
+  height: 84px;
   border: 1px solid ${({ theme }) => theme.colors.GRAY2};
-  line-height: 80px;
+  line-height: 84px;
   text-align: center;
   ${titleFont};
 `;

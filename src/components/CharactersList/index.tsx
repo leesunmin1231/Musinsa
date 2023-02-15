@@ -10,7 +10,7 @@ import type { CharacterType } from '../../types/CharacterType';
 
 export default function CharactersList() {
   const [characters, setCharacters] = useState<CharacterType[]>([]);
-  const { isLoading } = useQuery(['products'], () => httpGet('/characters?gender=Male'), {
+  const { isLoading } = useQuery(['characters'], () => httpGet('/characters'), {
     refetchOnWindowFocus: true,
     staleTime: 60 * 60 * 1000,
     onError: (error: RequestError) => alert(error),
@@ -30,5 +30,8 @@ export default function CharactersList() {
 const Wrapper = styled.section`
   width: 100%;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   ${bodyFont};
 `;
