@@ -10,6 +10,11 @@ export const bodyFont = css`
   font-weight: 400;
 `;
 
+export const buttonFont = css`
+  font-size: 12px;
+  font-weight: 400;
+`;
+
 export const highlightBodyFont = css`
   font-size: 24px;
   font-weight: 500;

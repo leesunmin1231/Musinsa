@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { buttonFont } from '../../../styles/mixin';
 import type { CharacterType } from '../../../types/CharacterType';
 
 export default function Character({ detail }: { detail: CharacterType }) {
@@ -46,10 +47,24 @@ const Delete = styled.div`
   align-items: center;
   justify-content: center;
 `;
+
 const DeleteButton = styled.button`
   height: 30px;
   width: 60px;
   border-radius: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.BLACK};
+  background-color: ${({ theme }) => theme.colors.WHITE};
+  cursor: pointer;
+  ${buttonFont}
+  &:focus {
+    outline: none;
+  }
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.GRAY4};
+  }
+  &:active {
+    filter: brightness(0.7);
+  }
 `;
 
 const InfoLine = styled.div`
