@@ -3,18 +3,16 @@ import styled from '@emotion/styled';
 import { useRecoilState } from 'recoil';
 import { bodyFont, buttonFont } from '../../styles/mixin';
 import { filters } from '../../atom';
-import { FilterListType } from '../../types/FilterListType';
+import { FilterType } from '../../types/FilterListType';
 
 export default function Filter() {
-  const [filterList, setFilterList] = useRecoilState(filters);
-  const clickHandler = (target: FilterListType) => {
-    setFilterList(
-      filterList.map((button) => (button.key === target.key ? { ...button, clicked: !button.clicked } : { ...button }))
-    );
+  const [filter, setFilter] = useRecoilState(filters);
+  const clickHandler = (target: FilterType) => {
+    setFilter({ ...filter, [target.key]: { ...target, clicked: !target.clicked } });
   };
   return (
     <Wrapper>
-      {filterList.map((button) =>
+      {Object.values(filter).map((button) =>
         button.clicked ? (
           <ClickedButton onClick={() => clickHandler(button)} key={button.key}>
             {button.buttonName}

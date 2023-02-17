@@ -4,8 +4,10 @@ import { buttonFont } from '../../../styles/mixin';
 import type { CharacterType } from '../../../types/CharacterType';
 
 export default function Character({ detail }: { detail: CharacterType }) {
+  const aliases = detail.aliases.join(', ');
+  const nameLength = detail.name.length;
   const aliasesEllipsis =
-    detail.aliases.length > 2 ? `${detail.aliases.slice(0, 2).join(', ')} ...` : detail.aliases.join(', ');
+    detail.name.length + aliases.length > 40 ? `${aliases.slice(0, 45 - nameLength)}...` : aliases;
   return (
     <Wrapper>
       <Info>
@@ -72,5 +74,6 @@ const InfoLine = styled.div`
   line-height: 20px;
   span {
     margin-right: 10px;
+    white-space: break-spaces;
   }
 `;

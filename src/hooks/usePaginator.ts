@@ -6,7 +6,7 @@ export const NEXT = {
   END: -1,
 };
 
-function useFetchPage(fetchUrl: string, nextCursor: number, pageSize: number) {
+function useFetchPage(fetchUrl: string, nextCursor: number, option: { pageSize: number; filter: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState<any>([]);
@@ -14,12 +14,12 @@ function useFetchPage(fetchUrl: string, nextCursor: number, pageSize: number) {
 
   useEffect(() => {
     setPage([]);
-  }, [fetchUrl]);
+  }, [fetchUrl, option.filter]);
 
   useEffect(() => {
     setLoading(true);
     setError(false);
-    const fetchUrlwithNext = `${fetchUrl}?page=${nextCursor}&pageSize=${pageSize}`;
+    const fetchUrlwithNext = `${fetchUrl}?page=${nextCursor}&pageSize=${option.pageSize}${option.filter}`;
     httpGet(fetchUrlwithNext)
       .then((res) => {
         if (res.length === 0) {
@@ -40,9 +40,12 @@ function useFetchPage(fetchUrl: string, nextCursor: number, pageSize: number) {
   return { loading, error, page, nextPageNum };
 }
 
-export default function usePaginator(url: string, pageSize: number) {
+export default function usePaginator(
+  url: string,
+  option: { pageSize: number; filter: string } = { pageSize: 10, filter: '' }
+) {
   const [nextCursor, setNextCursor] = useState(NEXT.START);
-  const { loading, error, page, nextPageNum } = useFetchPage(url, nextCursor, pageSize);
+  const { loading, error, page, nextPageNum } = useFetchPage(url, nextCursor, option);
 
   const observer = useRef<IntersectionObserver>();
   const observeElementRef = useCallback(

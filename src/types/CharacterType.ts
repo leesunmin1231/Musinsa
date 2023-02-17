@@ -5,4 +5,6 @@ export interface CharacterType {
   books: string[];
   tvSeries: string[];
   gender: string;
+  died: string;
+  born: string;
 }
