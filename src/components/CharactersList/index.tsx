@@ -1,30 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
-import { useQuery } from 'react-query';
 import { bodyFont } from '../../styles/mixin';
-import { httpGet } from '../../util/http';
 import Character from './Character';
-import { getListKey } from '../../util/getListKey';
-import type { RequestError } from '../../types/Error';
-import type { CharacterType } from '../../types/CharacterType';
 import Loading from '../Loading';
+import usePaginator from '../../hooks/usePaginator';
+import type { CharacterType } from '../../types/CharacterType';
 
 export default function CharactersList() {
-  const [characters, setCharacters] = useState<CharacterType[]>([]);
-  const { isLoading } = useQuery(['characters'], () => httpGet('/characters'), {
-    refetchOnWindowFocus: true,
-    staleTime: 60 * 60 * 1000,
-    onError: (error: RequestError) => alert(error),
-    onSuccess: (data) => setCharacters(data),
-  });
+  const { loading, error, page, observeElementRef } = usePaginator('/characters', 10);
+  if (error) {
+    alert('데이터를 불러오는 데 실패하였습니다.');
+  }
   return (
     <Wrapper>
-      {isLoading ? <Loading /> : characters.map((character) => <Character key={getListKey()} detail={character} />)}
+      {page.map((character: CharacterType) => (
+        <Character key={JSON.stringify(character)} detail={character} />
+      ))}
+      {loading ? <Loading /> : <div ref={observeElementRef} />}
     </Wrapper>
   );
 }
 
-const Wrapper = styled.section`
+const Wrapper = styled.main`
   width: 100%;
   flex: 1;
   display: flex;

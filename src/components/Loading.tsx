@@ -12,8 +12,8 @@ export default function Loading() {
 }
 
 const Spinner = styled.div`
-  width: 98px;
-  height: 98px;
+  width: 50px;
+  height: 50px;
   display: inline-block;
   overflow: hidden;
   background: #ffffff;
@@ -36,13 +36,13 @@ const Ldio = styled.div`
   }
   div {
     position: absolute;
-    width: 48px;
-    height: 48px;
-    border: 6px solid ${({ theme }) => theme.colors.GRAY1};
+    width: 25px;
+    height: 25px;
+    border: 3px solid ${({ theme }) => theme.colors.GRAY1};
     border-top-color: transparent;
     border-radius: 50%;
     animation: ldio-d5xbm7usfl 1s linear infinite;
-    top: 50px;
-    left: 50px;
+    top: 25px;
+    left: 25px;
   }
 `;

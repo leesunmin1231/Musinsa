@@ -1,6 +1,11 @@
 import { atom } from 'recoil';
 
-export const modalContent = atom({
-  key: 'modal',
-  default: { display: false, message: '', buttons: [] },
+type PageInfo = {
+  page: number;
+  pageSize: number;
+};
+
+export const page = atom<PageInfo>({
+  key: 'pageInfo',
+  default: { page: 1, pageSize: 10 },
 });

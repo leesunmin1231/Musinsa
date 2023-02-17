@@ -9,3 +9,8 @@ export const bodyFont = css`
   font-size: 16px;
   font-weight: 400;
 `;
+
+export const highlightBodyFont = css`
+  font-size: 24px;
+  font-weight: 500;
+`;
