@@ -4,39 +4,68 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { filters } from '../atom';
 import { httpGet } from '../util/http';
 import { getFilterQueryString } from '../util/filterQueryString';
+import { getRenderPageIndex } from '../util/getRenderPageIndex';
 import type { CharacterType } from '../types/CharacterType';
+import type { RenderCharacterList, ResponseCharacterList } from '../types/PageType';
 
-interface RenderPageDataType {
-  prevPage: CharacterType[];
-  nextPage: CharacterType[];
-  nextPageCursor: number;
-  renderList: CharacterType[];
-}
-
-const initRenderPageData: RenderPageDataType = {
+const initRenderPageData: RenderCharacterList = {
   prevPage: [],
-  nextPage: [],
-  nextPageCursor: 0,
-  renderList: [],
+  allRenderList: [],
 };
 
-export default function usePaginator(url: string, option: { pageSize: number }) {
-  const [responsePage, setResponsePage] = useState<CharacterType[]>([]);
-  const [renderPage, setRenderPage] = useState<RenderPageDataType>(initRenderPageData);
+const initResponsePageData: ResponseCharacterList = { allResponseList: [], newPage: [] };
+
+function useCharacterFilter(pageSize: number, responsePage: ResponseCharacterList) {
   const filterList = useRecoilValue(filters);
   const queryStringFilter = getFilterQueryString(filterList);
+  const [renderPage, setRenderPage] = useState<RenderCharacterList>(initRenderPageData);
+
+  const setNewRenderPage = (render: CharacterType[]) => {
+    const pageIndex = getRenderPageIndex(render.length, pageSize);
+    setRenderPage({
+      ...renderPage,
+      allRenderList: render.slice(0, pageIndex.renderPageIndex),
+      prevPage: render.slice(pageIndex.renderPageIndex, pageIndex.totalLength),
+    });
+  };
+
+  useEffect(() => {
+    if (filterList.noTvSeries.clicked) {
+      const render = [
+        ...renderPage.allRenderList,
+        ...renderPage.prevPage,
+        ...responsePage.newPage.filter((character) => character.tvSeries.join('').length === 0),
+      ];
+      setNewRenderPage(render);
+      return;
+    }
+    setRenderPage({ ...renderPage, allRenderList: [...responsePage.allResponseList] });
+  }, [responsePage, filterList]);
+
+  useEffect(() => {
+    if (filterList.noTvSeries.clicked) {
+      const render = responsePage.allResponseList.filter((character) => character.tvSeries.join('').length === 0);
+      setNewRenderPage(render);
+    }
+  }, [filterList.noTvSeries.clicked]);
+  return { queryStringFilter, renderPage: renderPage.allRenderList };
+}
+
+function useFetchPage(url: string, pageSize: number) {
   const queryClient = useQueryClient();
-  const observer = useRef<IntersectionObserver>();
+  const [responsePage, setResponsePage] = useState<ResponseCharacterList>(initResponsePageData);
+  const { queryStringFilter, renderPage } = useCharacterFilter(pageSize, responsePage);
 
   const getPageData = async ({ pageParam = 1 }) => {
     const response: CharacterType[] = await httpGet(
-      `${url}?${queryStringFilter}page=${pageParam}&pageSize=${option.pageSize}`
+      `${url}?${queryStringFilter}page=${pageParam}&pageSize=${pageSize}`
     );
     return {
       responsePage: response,
       current_page: pageParam,
     };
   };
+
   const { fetchNextPage, isLoading, hasNextPage } = useInfiniteQuery(['characters', queryStringFilter], getPageData, {
     refetchOnWindowFocus: true,
     staleTime: 3 * 60 * 1000,
@@ -44,11 +73,27 @@ export default function usePaginator(url: string, option: { pageSize: number }) 
     onSuccess: (data) => {
       const newPage = data.pages.at(-1);
       if (newPage) {
-        setResponsePage([...responsePage, ...newPage.responsePage]);
-        setRenderPage({ ...renderPage, nextPage: [...newPage.responsePage] });
+        setResponsePage({
+          ...responsePage,
+          newPage: newPage.responsePage,
+          allResponseList: [...responsePage.allResponseList, ...newPage.responsePage],
+        });
       }
     },
   });
+
+  useEffect(() => {
+    queryClient.invalidateQueries(['characters', queryStringFilter]);
+    setResponsePage({ allResponseList: [], newPage: [] });
+  }, [queryStringFilter]);
+
+  return { isLoading, renderPage, fetchNextPage, hasNextPage };
+}
+
+export default function usePaginator(url: string, pageSize: number) {
+  const observer = useRef<IntersectionObserver>();
+  const { isLoading, renderPage, fetchNextPage, hasNextPage } = useFetchPage(url, pageSize);
+
   const observeElementRef = useCallback(
     (observeTarget: HTMLDivElement) => {
       if (isLoading) return;
@@ -60,52 +105,8 @@ export default function usePaginator(url: string, option: { pageSize: number }) 
       });
       if (observeTarget) observer.current.observe(observeTarget);
     },
-    [isLoading, hasNextPage, renderPage.renderList]
+    [isLoading, hasNextPage, renderPage]
   );
 
-  const checkPageSize = (totalLength: number, pageSize: number) => {
-    const prevPageIndex = totalLength % pageSize;
-    if (prevPageIndex === 0) return { totalLength, renderPageIndex: totalLength };
-    return { totalLength, renderPageIndex: Math.trunc(totalLength / pageSize) * pageSize };
-  };
-
-  useEffect(() => {
-    queryClient.invalidateQueries(['characters', queryStringFilter]);
-    setRenderPage(initRenderPageData);
-    setResponsePage([]);
-  }, [queryStringFilter]);
-
-  useEffect(() => {
-    if (filterList.noTvSeries.clicked) {
-      const render = [
-        ...renderPage.renderList,
-        ...renderPage.prevPage,
-        ...renderPage.nextPage.filter((character) => character.tvSeries.join('').length === 0),
-      ];
-      const pageIndex = checkPageSize(render.length, option.pageSize);
-      setRenderPage({
-        ...renderPage,
-        renderList: render.slice(0, pageIndex.renderPageIndex),
-        prevPage: render.slice(pageIndex.renderPageIndex, pageIndex.totalLength),
-        nextPage: [],
-      });
-      return;
-    }
-    setRenderPage({ ...renderPage, renderList: [...responsePage] });
-  }, [responsePage, filterList]);
-
-  useEffect(() => {
-    if (filterList.noTvSeries.clicked) {
-      const render = responsePage.filter((character) => character.tvSeries.join('').length === 0);
-      const pageIndex = checkPageSize(render.length, option.pageSize);
-      setRenderPage({
-        ...renderPage,
-        renderList: render.slice(0, pageIndex.renderPageIndex),
-        prevPage: render.slice(pageIndex.renderPageIndex, pageIndex.totalLength),
-        nextPage: [],
-      });
-    }
-  }, [filterList.noTvSeries.clicked]);
-
-  return { isLoading, renderPage: renderPage.renderList, observeElementRef };
+  return { isLoading, renderPage, observeElementRef };
 }

@@ -7,9 +7,7 @@ import usePaginator from '../../hooks/usePaginator';
 import type { CharacterType } from '../../types/CharacterType';
 
 export default function CharactersList() {
-  const { isLoading, renderPage, observeElementRef } = usePaginator(`/characters`, {
-    pageSize: 10,
-  });
+  const { isLoading, renderPage, observeElementRef } = usePaginator(`/characters`, 10);
   console.log(renderPage.length);
   return (
     <Wrapper>
