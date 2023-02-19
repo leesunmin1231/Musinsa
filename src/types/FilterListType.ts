@@ -2,7 +2,6 @@ export interface AllFiltersType {
   isAlive: FilterType;
   female: FilterType;
   noTvSeries: FilterType;
-  init: FilterType;
 }
 export type FilterType = {
   key: string;

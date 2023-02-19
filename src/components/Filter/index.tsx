@@ -10,6 +10,14 @@ export default function Filter() {
   const clickHandler = (target: FilterType) => {
     setFilter({ ...filter, [target.key]: { ...target, clicked: !target.clicked } });
   };
+  const initHandler = () => {
+    setFilter({
+      ...filter,
+      isAlive: { ...filter.isAlive, clicked: false },
+      female: { ...filter.female, clicked: false },
+      noTvSeries: { ...filter.noTvSeries, clicked: false },
+    });
+  };
   return (
     <Wrapper>
       {Object.values(filter).map((button) =>
@@ -23,6 +31,7 @@ export default function Filter() {
           </UnClickedButton>
         )
       )}
+      <UnClickedButton onClick={initHandler}>초기화</UnClickedButton>
     </Wrapper>
   );
 }
