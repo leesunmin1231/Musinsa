@@ -21,8 +21,8 @@ function App() {
           <Frame>
             <Router>
               <Routes>
-                <Route path="/404" element={<Error />} />
                 <Route path="/" element={<CharactersPage />} />
+                <Route path="/*" element={<Error />} />
               </Routes>
             </Router>
           </Frame>

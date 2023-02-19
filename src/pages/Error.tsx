@@ -8,7 +8,7 @@ export default function Error() {
   return (
     <Wrapper>
       <ErrorCode>404</ErrorCode>
-      <ErrorMessage>{state.message}</ErrorMessage>
+      <ErrorMessage>{state || '웹 페이지를 표시할 수 없습니다.'}</ErrorMessage>
     </Wrapper>
   );
 }

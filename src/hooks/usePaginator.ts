@@ -81,6 +81,7 @@ function useFetchPage(url: string, pageSize: number) {
     {
       refetchOnWindowFocus: true,
       staleTime: 3 * 60 * 1000,
+      retry: 1,
       getNextPageParam: (lastPage) => lastPage.currentPage + 1,
       onError: (error: ResponseError) => {
         setContent(`ERROR: ${error.message}`, [
