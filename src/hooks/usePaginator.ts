@@ -28,7 +28,7 @@ function useCharacterFilter(pageSize: number, responsePage: ResponseCharacterLis
   const [renderPage, setRenderPage] = useState<RenderCharacterList>(initRenderPageData);
 
   const setNewRenderPage = (render: CharacterType[]) => {
-    const pageIndex = getRenderPageIndex(render.length, pageSize);
+    const pageIndex = getRenderPageIndex(render.length, pageSize, responsePage.newPage.length);
     setRenderPage({
       ...renderPage,
       allRenderList: render.slice(0, pageIndex.renderPageIndex),
@@ -74,6 +74,27 @@ function useFetchPage(url: string, pageSize: number) {
       currentPage: pageParam,
     };
   };
+  const fetchErrorHandler = (error: ResponseError) => {
+    setContent(`ERROR: ${error.message}`, [
+      {
+        name: '확인',
+        handler: () => {
+          navigate('/404', { state: error.message });
+          closeModal();
+        },
+      },
+    ]);
+  };
+  const fetchSuccessHandler = (pages: { responseList: CharacterType[]; currentPage: number }[]) => {
+    const newPage = pages.at(-1);
+    if (newPage) {
+      setResponsePage({
+        ...responsePage,
+        newPage: newPage.responseList,
+        allResponseList: [...responsePage.allResponseList, ...newPage.responseList],
+      });
+    }
+  };
 
   const { fetchNextPage, isLoading, hasNextPage, isFetching } = useInfiniteQuery(
     ['characters', queryStringFilter],
@@ -82,28 +103,12 @@ function useFetchPage(url: string, pageSize: number) {
       refetchOnWindowFocus: true,
       staleTime: 3 * 60 * 1000,
       retry: 1,
-      getNextPageParam: (lastPage) => lastPage.currentPage + 1,
-      onError: (error: ResponseError) => {
-        setContent(`ERROR: ${error.message}`, [
-          {
-            name: '확인',
-            handler: () => {
-              navigate('/404', { state: error.message });
-              closeModal();
-            },
-          },
-        ]);
+      getNextPageParam: (lastPage) => {
+        if (lastPage.responseList.length === 0) return undefined;
+        return lastPage.currentPage + 1;
       },
-      onSuccess: (data) => {
-        const newPage = data.pages.at(-1);
-        if (newPage) {
-          setResponsePage({
-            ...responsePage,
-            newPage: newPage.responseList,
-            allResponseList: [...responsePage.allResponseList, ...newPage.responseList],
-          });
-        }
-      },
+      onError: (error: ResponseError) => fetchErrorHandler(error),
+      onSuccess: (data) => fetchSuccessHandler(data.pages),
     }
   );
 
