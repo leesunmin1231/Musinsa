@@ -1,10 +1,12 @@
 import { useInfiniteQuery, useQueryClient } from 'react-query';
 import { useRecoilValue } from 'recoil';
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { filters } from '../atom';
 import { httpGet } from '../util/http';
 import { getFilterQueryString } from '../util/filterQueryString';
 import { getRenderPageIndex } from '../util/getRenderPageIndex';
+import useModal from './useModal';
 import type { CharacterType } from '../types/CharacterType';
 import type { RenderCharacterList, ResponseCharacterList } from '../types/PageType';
 
@@ -12,6 +14,11 @@ const initRenderPageData: RenderCharacterList = {
   prevPage: [],
   allRenderList: [],
 };
+
+interface ResponseError {
+  code: string;
+  message: string;
+}
 
 const initResponsePageData: ResponseCharacterList = { allResponseList: [], newPage: [] };
 
@@ -53,6 +60,8 @@ function useCharacterFilter(pageSize: number, responsePage: ResponseCharacterLis
 
 function useFetchPage(url: string, pageSize: number) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { setContent, closeModal } = useModal();
   const [responsePage, setResponsePage] = useState<ResponseCharacterList>(initResponsePageData);
   const { queryStringFilter, renderPage } = useCharacterFilter(pageSize, responsePage);
 
@@ -70,6 +79,17 @@ function useFetchPage(url: string, pageSize: number) {
     refetchOnWindowFocus: true,
     staleTime: 3 * 60 * 1000,
     getNextPageParam: (lastPage) => lastPage.current_page + 1,
+    onError: (error: ResponseError) => {
+      setContent(`ERROR: ${error.message}`, [
+        {
+          name: '확인',
+          handler: () => {
+            navigate('/404', { state: error.message });
+            closeModal();
+          },
+        },
+      ]);
+    },
     onSuccess: (data) => {
       const newPage = data.pages.at(-1);
       if (newPage) {

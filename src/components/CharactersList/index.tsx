@@ -8,7 +8,6 @@ import type { CharacterType } from '../../types/CharacterType';
 
 export default function CharactersList() {
   const { isLoading, renderPage, observeElementRef } = usePaginator(`/characters`, 10);
-  console.log(renderPage.length);
   return (
     <Wrapper>
       {renderPage.map((character: CharacterType) => (
