@@ -132,6 +132,9 @@ const globalStyle = css`
   body {
     height: 100%;
     padding: 0;
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera*/
+    }
   }
 
   * {

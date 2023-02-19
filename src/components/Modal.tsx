@@ -55,7 +55,7 @@ const ModalBox = styled.div`
   height: min-content;
   position: relative;
   z-index: 2;
-  padding: 50px 0.5rem;
+  padding: 50px 4%;
   border-radius: 10px;
   background-color: ${({ theme }) => theme.colors.WHITE};
   display: flex;

@@ -13,11 +13,12 @@ export default function Character({ detail }: { detail: CharacterType }) {
     detail.name.length + aliases.length > 40 ? `${aliases.slice(0, 45 - nameLength)}...` : aliases;
 
   const deleteHandler = () => {
+    // 삭제 api 요청
     setIsDelete(true);
     closeModal();
   };
   const clickDeleteHandler = () => {
-    setContent(`정말 삭제하시겠습니까?`, [
+    setContent(`${detail.name} 캐릭터를 삭제하시겠습니까?`, [
       { name: '확인', handler: deleteHandler },
       { name: '취소', handler: closeModal },
     ]);
