@@ -1,5 +1,4 @@
 export interface AllFiltersType {
-  noName: FilterType;
   isAlive: FilterType;
   female: FilterType;
   noTvSeries: FilterType;

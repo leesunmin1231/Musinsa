@@ -12,7 +12,7 @@ export default function Character({ detail }: { detail: CharacterType }) {
     <Wrapper>
       <Info>
         <InfoLine>
-          <span>name: {detail.name}</span>
+          <span>name: {detail.name.length === 0 ? 'No Name' : detail.name}</span>
           <span>aliases: {aliasesEllipsis}</span>
         </InfoLine>
         <InfoLine>title: {detail.title}</InfoLine>
