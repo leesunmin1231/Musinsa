@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
 import { Global, ThemeProvider } from '@emotion/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
 import { RecoilRoot } from 'recoil';
 import styled from '@emotion/styled';
 import globalStyle from './styles/global';
@@ -27,7 +26,6 @@ function App() {
             </Router>
           </Frame>
           <Modal />
-          <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
         </ThemeProvider>
       </RecoilRoot>
     </QueryClientProvider>
