@@ -7,5 +7,4 @@ export type FilterType = {
   key: string;
   buttonName: string;
   clicked: boolean;
-  queryFiltering: boolean;
 };
