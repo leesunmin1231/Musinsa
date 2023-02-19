@@ -11,13 +11,10 @@ import type { CharacterType } from '../../types/CharacterType';
 
 export default function CharactersList() {
   const filterList = useRecoilValue(filters);
-  const { loading, error, page, observeElementRef } = usePaginator('/characters', {
+  const { isLoading, page, observeElementRef } = usePaginator(`/characters`, {
     pageSize: 10,
     filter: getFilterQueryString(filterList),
   });
-  if (error) {
-    alert('데이터를 불러오는 데 실패하였습니다.');
-  }
   const [renderList, setRenderList] = useState<CharacterType[]>(page);
 
   useEffect(() => {
@@ -35,7 +32,7 @@ export default function CharactersList() {
       {renderList.map((character: CharacterType) => (
         <Character key={JSON.stringify(character)} detail={character} />
       ))}
-      {loading ? <Loading /> : <Observer ref={observeElementRef} />}
+      {isLoading ? <Loading /> : <Observer ref={observeElementRef} />}
     </Wrapper>
   );
 }

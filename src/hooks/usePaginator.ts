@@ -1,65 +1,46 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useInfiniteQuery, useQueryClient } from 'react-query';
+import { useState, useRef, useCallback } from 'react';
 import { httpGet } from '../util/http';
+import type { CharacterType } from '../types/CharacterType';
 
-export const NEXT = {
-  START: 1,
-  END: -1,
-};
-
-function useFetchPage(fetchUrl: string, nextCursor: number, option: { pageSize: number; filter: string }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [page, setPage] = useState<any>([]);
-  const [nextPageNum, setNextPageNum] = useState(nextCursor);
-
-  useEffect(() => {
-    setPage([]);
-  }, [fetchUrl, option.filter]);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
-    const fetchUrlwithNext = `${fetchUrl}?page=${nextCursor}&pageSize=${option.pageSize}${option.filter}`;
-    httpGet(fetchUrlwithNext)
-      .then((res) => {
-        if (res.length === 0) {
-          setNextPageNum(-1);
-        } else {
-          setNextPageNum(nextCursor + 1);
-        }
-        setPage([...page, ...res]);
-      })
-      .catch(() => {
-        setError(true);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [fetchUrl, nextCursor]);
-
-  return { loading, error, page, nextPageNum };
-}
-
-export default function usePaginator(
-  url: string,
-  option: { pageSize: number; filter: string } = { pageSize: 10, filter: '' }
-) {
-  const [nextCursor, setNextCursor] = useState(NEXT.START);
-  const { loading, error, page, nextPageNum } = useFetchPage(url, nextCursor, option);
-
+export default function usePaginator(url: string, option: { pageSize: number; filter: string }) {
+  const [page, setPage] = useState<CharacterType[]>([]);
+  const queryClient = useQueryClient();
   const observer = useRef<IntersectionObserver>();
+
+  const getPageData = async ({ pageParam = 1 }) => {
+    const response: CharacterType[] = await httpGet(
+      `${url}?${option.filter}page=${pageParam}&pageSize=${option.pageSize}`
+    );
+    return {
+      page: response,
+      current_page: pageParam,
+    };
+  };
+  const { fetchNextPage, isLoading, hasNextPage } = useInfiniteQuery(['characters', option.filter], getPageData, {
+    refetchOnWindowFocus: true,
+    staleTime: 3 * 60 * 1000,
+    getNextPageParam: (lastPage) => lastPage.current_page + 1,
+    onSuccess: (data) => {
+      setPage(data.pages.map((item) => item.page).flat());
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(['characters', option.filter]);
+    },
+  });
   const observeElementRef = useCallback(
     (observeTarget: HTMLDivElement) => {
-      if (loading) return;
+      if (isLoading) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && nextPageNum !== NEXT.END) {
-          setNextCursor(nextPageNum);
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
         }
       });
       if (observeTarget) observer.current.observe(observeTarget);
     },
-    [loading, nextPageNum !== NEXT.END]
+    [isLoading, hasNextPage]
   );
-  return { loading, error, page, observeElementRef };
+
+  return { isLoading, page, observeElementRef };
 }

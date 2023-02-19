@@ -20,6 +20,7 @@ export default function Character({ detail }: { detail: CharacterType }) {
           <span>books: {detail.books.length}</span>
           <span>tvSeries: {detail.tvSeries.filter((tv) => tv !== '').length}</span>
         </InfoLine>
+        <InfoLine>gender: {detail.gender}</InfoLine>
       </Info>
       <Delete>
         <DeleteButton>삭제</DeleteButton>
