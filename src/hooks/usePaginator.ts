@@ -75,44 +75,48 @@ function useFetchPage(url: string, pageSize: number) {
     };
   };
 
-  const { fetchNextPage, isLoading, hasNextPage } = useInfiniteQuery(['characters', queryStringFilter], getPageData, {
-    refetchOnWindowFocus: true,
-    staleTime: 3 * 60 * 1000,
-    getNextPageParam: (lastPage) => lastPage.current_page + 1,
-    onError: (error: ResponseError) => {
-      setContent(`ERROR: ${error.message}`, [
-        {
-          name: '확인',
-          handler: () => {
-            navigate('/404', { state: error.message });
-            closeModal();
+  const { fetchNextPage, isLoading, hasNextPage, isFetching } = useInfiniteQuery(
+    ['characters', queryStringFilter],
+    getPageData,
+    {
+      refetchOnWindowFocus: true,
+      staleTime: 3 * 60 * 1000,
+      getNextPageParam: (lastPage) => lastPage.current_page + 1,
+      onError: (error: ResponseError) => {
+        setContent(`ERROR: ${error.message}`, [
+          {
+            name: '확인',
+            handler: () => {
+              navigate('/404', { state: error.message });
+              closeModal();
+            },
           },
-        },
-      ]);
-    },
-    onSuccess: (data) => {
-      const newPage = data.pages.at(-1);
-      if (newPage) {
-        setResponsePage({
-          ...responsePage,
-          newPage: newPage.responsePage,
-          allResponseList: [...responsePage.allResponseList, ...newPage.responsePage],
-        });
-      }
-    },
-  });
+        ]);
+      },
+      onSuccess: (data) => {
+        const newPage = data.pages.at(-1);
+        if (newPage) {
+          setResponsePage({
+            ...responsePage,
+            newPage: newPage.responsePage,
+            allResponseList: [...responsePage.allResponseList, ...newPage.responsePage],
+          });
+        }
+      },
+    }
+  );
 
   useEffect(() => {
     queryClient.invalidateQueries(['characters', queryStringFilter]);
     setResponsePage({ allResponseList: [], newPage: [] });
   }, [queryStringFilter]);
 
-  return { isLoading, renderPage, fetchNextPage, hasNextPage };
+  return { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching };
 }
 
 export default function usePaginator(url: string, pageSize: number) {
   const observer = useRef<IntersectionObserver>();
-  const { isLoading, renderPage, fetchNextPage, hasNextPage } = useFetchPage(url, pageSize);
+  const { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching } = useFetchPage(url, pageSize);
 
   const observeElementRef = useCallback(
     (observeTarget: HTMLDivElement) => {
@@ -128,5 +132,5 @@ export default function usePaginator(url: string, pageSize: number) {
     [isLoading, hasNextPage, renderPage]
   );
 
-  return { isLoading, renderPage, observeElementRef };
+  return { isLoading, isFetching, renderPage, observeElementRef };
 }

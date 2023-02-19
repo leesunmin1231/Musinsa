@@ -7,13 +7,13 @@ import usePaginator from '../../hooks/usePaginator';
 import type { CharacterType } from '../../types/CharacterType';
 
 export default function CharactersList() {
-  const { isLoading, renderPage, observeElementRef } = usePaginator(`/characters`, 10);
+  const { isFetching, renderPage, observeElementRef } = usePaginator(`/characters`, 10);
   return (
     <Wrapper>
       {renderPage.map((character: CharacterType) => (
         <Character key={JSON.stringify(character)} detail={character} />
       ))}
-      {isLoading ? <Loading /> : <Observer ref={observeElementRef} />}
+      {isFetching ? <Loading /> : <Observer ref={observeElementRef} />}
     </Wrapper>
   );
 }

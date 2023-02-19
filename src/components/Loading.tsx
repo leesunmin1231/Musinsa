@@ -12,6 +12,7 @@ export default function Loading() {
 }
 
 const Spinner = styled.div`
+  margin-top: 30px;
   width: 50px;
   height: 50px;
   display: inline-block;

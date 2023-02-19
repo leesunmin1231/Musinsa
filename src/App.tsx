@@ -37,6 +37,7 @@ function App() {
 const Frame = styled.div`
   height: 100%;
   width: 100%;
+  max-width: 800px;
   position: absolute;
 `;
 
