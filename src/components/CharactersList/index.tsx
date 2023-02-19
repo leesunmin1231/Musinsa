@@ -11,7 +11,7 @@ export default function CharactersList() {
   return (
     <Wrapper>
       {renderPage.map((character: CharacterType) => (
-        <Character key={JSON.stringify(character)} detail={character} />
+        <Character key={character.url} detail={character} />
       ))}
       {isFetching ? <Loading /> : <Observer ref={observeElementRef} />}
     </Wrapper>

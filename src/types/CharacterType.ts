@@ -7,4 +7,5 @@ export interface CharacterType {
   gender: string;
   died: string;
   born: string;
+  url: string;
 }

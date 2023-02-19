@@ -46,9 +46,10 @@ export default function Character({ detail }: { detail: CharacterType }) {
 
 const Wrapper = styled.article<{ isDelete: boolean }>`
   width: 100%;
-  height: 84px;
+  height: 7.7rem;
   justify-content: space-between;
   border: 1px solid ${({ theme }) => theme.colors.GRAY2};
+  padding: 0 10px;
   margin-bottom: 15px;
   display: ${({ isDelete }) => (isDelete ? 'none' : 'flex')};
 `;
@@ -57,6 +58,7 @@ const Info = styled.div`
   width: 76%;
   display: flex;
   flex-direction: column;
+  margin-top: 2px;
 `;
 
 const Delete = styled.div`

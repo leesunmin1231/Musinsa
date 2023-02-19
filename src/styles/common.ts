@@ -18,4 +18,8 @@ export const MiddleButton = styled.button`
   &:active {
     filter: brightness(0.7);
   }
+  @media only screen and (max-width: 280px) {
+    height: 25px;
+    width: 48px;
+  }
 `;

@@ -8,11 +8,17 @@ export const titleFont = css`
 export const bodyFont = css`
   font-size: 16px;
   font-weight: 400;
+  @media only screen and (max-width: 280px) {
+    font-size: 14px;
+  }
 `;
 
 export const buttonFont = css`
   font-size: 12px;
   font-weight: 400;
+  @media only screen and (max-width: 280px) {
+    font-size: 10px;
+  }
 `;
 
 export const highlightBodyFont = css`
