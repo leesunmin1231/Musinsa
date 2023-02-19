@@ -55,7 +55,7 @@ function useCharacterFilter(pageSize: number, responsePage: ResponseCharacterLis
       setNewRenderPage(render);
     }
   }, [filterList.noTvSeries.clicked]);
-  return { queryStringFilter, renderPage: renderPage.allRenderList };
+  return { queryStringFilter, renderPage: renderPage.allRenderList, setRenderPage };
 }
 
 function useFetchPage(url: string, pageSize: number) {
@@ -63,15 +63,15 @@ function useFetchPage(url: string, pageSize: number) {
   const navigate = useNavigate();
   const { setContent, closeModal } = useModal();
   const [responsePage, setResponsePage] = useState<ResponseCharacterList>(initResponsePageData);
-  const { queryStringFilter, renderPage } = useCharacterFilter(pageSize, responsePage);
+  const { queryStringFilter, renderPage, setRenderPage } = useCharacterFilter(pageSize, responsePage);
 
   const getPageData = async ({ pageParam = 1 }) => {
     const response: CharacterType[] = await httpGet(
       `${url}?${queryStringFilter}page=${pageParam}&pageSize=${pageSize}`
     );
     return {
-      responsePage: response,
-      current_page: pageParam,
+      responseList: response,
+      currentPage: pageParam,
     };
   };
 
@@ -81,7 +81,7 @@ function useFetchPage(url: string, pageSize: number) {
     {
       refetchOnWindowFocus: true,
       staleTime: 3 * 60 * 1000,
-      getNextPageParam: (lastPage) => lastPage.current_page + 1,
+      getNextPageParam: (lastPage) => lastPage.currentPage + 1,
       onError: (error: ResponseError) => {
         setContent(`ERROR: ${error.message}`, [
           {
@@ -98,8 +98,8 @@ function useFetchPage(url: string, pageSize: number) {
         if (newPage) {
           setResponsePage({
             ...responsePage,
-            newPage: newPage.responsePage,
-            allResponseList: [...responsePage.allResponseList, ...newPage.responsePage],
+            newPage: newPage.responseList,
+            allResponseList: [...responsePage.allResponseList, ...newPage.responseList],
           });
         }
       },
@@ -109,6 +109,7 @@ function useFetchPage(url: string, pageSize: number) {
   useEffect(() => {
     queryClient.invalidateQueries(['characters', queryStringFilter]);
     setResponsePage({ allResponseList: [], newPage: [] });
+    setRenderPage({ allRenderList: [], prevPage: [] });
   }, [queryStringFilter]);
 
   return { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching };
