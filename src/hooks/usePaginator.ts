@@ -6,14 +6,23 @@ import { httpGet } from '../util/http';
 import { getFilterQueryString } from '../util/filterQueryString';
 import type { CharacterType } from '../types/CharacterType';
 
-const checkPageSize = (totalLength: number, pageSize: number): number => {
-  if (totalLength % pageSize === 0) return totalLength;
-  return Math.trunc(totalLength / pageSize) * pageSize;
+interface RenderPageDataType {
+  prevPage: CharacterType[];
+  nextPage: CharacterType[];
+  nextPageCursor: number;
+  renderList: CharacterType[];
+}
+
+const initRenderPageData: RenderPageDataType = {
+  prevPage: [],
+  nextPage: [],
+  nextPageCursor: 0,
+  renderList: [],
 };
 
 export default function usePaginator(url: string, option: { pageSize: number }) {
   const [responsePage, setResponsePage] = useState<CharacterType[]>([]);
-  const [renderPage, setRenderPage] = useState<CharacterType[]>([]);
+  const [renderPage, setRenderPage] = useState<RenderPageDataType>(initRenderPageData);
   const filterList = useRecoilValue(filters);
   const queryStringFilter = getFilterQueryString(filterList);
   const queryClient = useQueryClient();
@@ -33,7 +42,11 @@ export default function usePaginator(url: string, option: { pageSize: number }) 
     staleTime: 3 * 60 * 1000,
     getNextPageParam: (lastPage) => lastPage.current_page + 1,
     onSuccess: (data) => {
-      setResponsePage(data.pages.map((item) => item.responsePage).flat());
+      const newPage = data.pages.at(-1);
+      if (newPage) {
+        setResponsePage([...responsePage, ...newPage.responsePage]);
+        setRenderPage({ ...renderPage, nextPage: [...newPage.responsePage] });
+      }
     },
   });
   const observeElementRef = useCallback(
@@ -47,21 +60,52 @@ export default function usePaginator(url: string, option: { pageSize: number }) 
       });
       if (observeTarget) observer.current.observe(observeTarget);
     },
-    [isLoading, hasNextPage]
+    [isLoading, hasNextPage, renderPage.renderList]
   );
+
+  const checkPageSize = (totalLength: number, pageSize: number) => {
+    const prevPageIndex = totalLength % pageSize;
+    if (prevPageIndex === 0) return { totalLength, renderPageIndex: totalLength };
+    return { totalLength, renderPageIndex: Math.trunc(totalLength / pageSize) * pageSize };
+  };
 
   useEffect(() => {
     queryClient.invalidateQueries(['characters', queryStringFilter]);
+    setRenderPage(initRenderPageData);
+    setResponsePage([]);
   }, [queryStringFilter]);
 
   useEffect(() => {
     if (filterList.noTvSeries.clicked) {
-      const render = responsePage.filter((character) => character.tvSeries.join('').length === 0);
-      setRenderPage(render.slice(0, checkPageSize(render.length, option.pageSize)));
+      const render = [
+        ...renderPage.renderList,
+        ...renderPage.prevPage,
+        ...renderPage.nextPage.filter((character) => character.tvSeries.join('').length === 0),
+      ];
+      const pageIndex = checkPageSize(render.length, option.pageSize);
+      setRenderPage({
+        ...renderPage,
+        renderList: render.slice(0, pageIndex.renderPageIndex),
+        prevPage: render.slice(pageIndex.renderPageIndex, pageIndex.totalLength),
+        nextPage: [],
+      });
       return;
     }
-    setRenderPage([...responsePage]);
+    setRenderPage({ ...renderPage, renderList: [...responsePage] });
   }, [responsePage, filterList]);
 
-  return { isLoading, renderPage, observeElementRef };
+  useEffect(() => {
+    if (filterList.noTvSeries.clicked) {
+      const render = responsePage.filter((character) => character.tvSeries.join('').length === 0);
+      const pageIndex = checkPageSize(render.length, option.pageSize);
+      setRenderPage({
+        ...renderPage,
+        renderList: render.slice(0, pageIndex.renderPageIndex),
+        prevPage: render.slice(pageIndex.renderPageIndex, pageIndex.totalLength),
+        nextPage: [],
+      });
+    }
+  }, [filterList.noTvSeries.clicked]);
+
+  return { isLoading, renderPage: renderPage.renderList, observeElementRef };
 }
