@@ -20,6 +20,11 @@ interface ResponseError {
   message: string;
 }
 
+interface PageOption {
+  startPage: number;
+  pageSize: number;
+}
+
 const initResponsePageData: ResponseCharacterList = { allResponseList: [], newPage: [] };
 
 function useCharacterFilter(pageSize: number, responsePage: ResponseCharacterList) {
@@ -58,16 +63,15 @@ function useCharacterFilter(pageSize: number, responsePage: ResponseCharacterLis
   return { queryStringFilter, renderPage: renderPage.allRenderList, setRenderPage };
 }
 
-function useFetchPage(url: string, pageSize: number) {
+function useFetchPage(url: string, option: PageOption) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { setContent, closeModal } = useModal();
   const [responsePage, setResponsePage] = useState<ResponseCharacterList>(initResponsePageData);
-  const { queryStringFilter, renderPage, setRenderPage } = useCharacterFilter(pageSize, responsePage);
-
-  const getPageData = async ({ pageParam = 1 }) => {
+  const { queryStringFilter, renderPage, setRenderPage } = useCharacterFilter(option.pageSize, responsePage);
+  const getPageData = async ({ pageParam = option.startPage }) => {
     const response: CharacterType[] = await httpGet(
-      `${url}?${queryStringFilter}page=${pageParam}&pageSize=${pageSize}`
+      `${url}?${queryStringFilter}page=${pageParam}&pageSize=${option.pageSize}`
     );
     return {
       responseList: response,
@@ -121,9 +125,9 @@ function useFetchPage(url: string, pageSize: number) {
   return { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching };
 }
 
-export default function usePaginator(url: string, pageSize: number) {
+export default function usePaginator(url: string, option: PageOption) {
   const observer = useRef<IntersectionObserver>();
-  const { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching } = useFetchPage(url, pageSize);
+  const { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching } = useFetchPage(url, option);
 
   const observeElementRef = useCallback(
     (observeTarget: HTMLDivElement) => {

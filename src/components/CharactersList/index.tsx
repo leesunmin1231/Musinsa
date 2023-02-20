@@ -1,4 +1,5 @@
 import React from 'react';
+import queryString from 'query-string';
 import styled from '@emotion/styled';
 import { bodyFont } from '../../styles/mixin';
 import Character from './Character';
@@ -6,8 +7,18 @@ import Loading from '../Loading';
 import usePaginator from '../../hooks/usePaginator';
 import type { CharacterType } from '../../types/CharacterType';
 
+const getStartPage = () => {
+  const pageQuery = queryString.parse(window.location.search);
+  const start = pageQuery?.page;
+  if (start !== undefined) return Number(start);
+  return 1;
+};
+
 export default function CharactersList() {
-  const { isFetching, renderPage, observeElementRef } = usePaginator(`/characters`, 10);
+  const { isFetching, renderPage, observeElementRef } = usePaginator(`/characters`, {
+    startPage: getStartPage(),
+    pageSize: 10,
+  });
   return (
     <Wrapper>
       {renderPage.map((character: CharacterType) => (

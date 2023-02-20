@@ -17,7 +17,7 @@ const Spinner = styled.div`
   height: 50px;
   display: inline-block;
   overflow: hidden;
-  background: #ffffff;
+  background: ${({ theme }) => theme.colors.WHITE};
 `;
 
 const Ldio = styled.div`
