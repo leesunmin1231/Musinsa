@@ -25,3 +25,23 @@ export const highlightBodyFont = css`
   font-size: 24px;
   font-weight: 500;
 `;
+
+export const badge = css`
+  height: 30px;
+  width: min-content;
+  border-radius: 10px;
+  white-space: pre;
+  ${buttonFont}
+  cursor: pointer;
+  &:focus {
+    outline: none;
+  }
+  &:active {
+    filter: brightness(0.7);
+  }
+  @media (hover: hover) {
+    &:hover {
+      filter: brightness(0.9);
+    }
+  }
+`;

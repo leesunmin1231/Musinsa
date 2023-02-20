@@ -35,7 +35,7 @@ export default function Character({ detail }: { detail: CharacterType }) {
           <span>books: {detail.books.length}</span>
           <span>tvSeries: {detail.tvSeries.filter((tv) => tv !== '').length}</span>
         </InfoLine>
-        <InfoLine>gender: {detail.gender}</InfoLine>
+        <InfoLine>gender: {detail.died}</InfoLine>
       </Info>
       <Delete>
         <MiddleButton onClick={clickDeleteHandler}>삭제</MiddleButton>

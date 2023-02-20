@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { useRecoilState } from 'recoil';
-import { bodyFont, buttonFont } from '../../styles/mixin';
+import { bodyFont, badge } from '../../styles/mixin';
 import { filters } from '../../atom';
 import { FilterType } from '../../types/FilterListType';
 
@@ -22,16 +22,16 @@ export default function Filter() {
     <Wrapper>
       {Object.values(filter).map((button) =>
         button.clicked ? (
-          <ClickedButton onClick={() => clickHandler(button)} key={button.key}>
+          <ClickedBadge onClick={() => clickHandler(button)} key={button.key}>
             {button.buttonName}
-          </ClickedButton>
+          </ClickedBadge>
         ) : (
-          <UnClickedButton onClick={() => clickHandler(button)} key={button.key}>
+          <UnClickedBadge onClick={() => clickHandler(button)} key={button.key}>
             {button.buttonName}
-          </UnClickedButton>
+          </UnClickedBadge>
         )
       )}
-      <UnClickedButton onClick={initHandler}>초기화</UnClickedButton>
+      <UnClickedBadge onClick={initHandler}>초기화</UnClickedBadge>
     </Wrapper>
   );
 }
@@ -45,44 +45,16 @@ const Wrapper = styled.div`
   ${bodyFont};
 `;
 
-const ClickedButton = styled.button`
-  height: 30px;
-  width: min-content;
-  border-radius: 10px;
+const ClickedBadge = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.BLACK};
   color: ${({ theme }) => theme.colors.BLACK};
   background-color: ${({ theme }) => theme.colors.WHITE};
-  white-space: pre;
-  ${buttonFont}
-  cursor: pointer;
-  &:focus {
-    outline: none;
-  }
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.GRAY5};
-  }
-  &:active {
-    filter: brightness(0.7);
-  }
+  ${badge}
 `;
 
-const UnClickedButton = styled.button`
-  height: 30px;
-  width: min-content;
-  border-radius: 10px;
+const UnClickedBadge = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.GRAY2};
   color: ${({ theme }) => theme.colors.GRAY2};
   background-color: ${({ theme }) => theme.colors.WHITE};
-  white-space: pre;
-  ${buttonFont}
-  cursor: pointer;
-  &:focus {
-    outline: none;
-  }
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.GRAY5};
-  }
-  &:active {
-    filter: brightness(0.7);
-  }
+  ${badge}
 `;
