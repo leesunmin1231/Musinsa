@@ -1,4 +1,4 @@
-export interface RequestError {
+export interface ResponseError {
   code: string;
   message: string;
 }

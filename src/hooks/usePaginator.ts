@@ -1,75 +1,28 @@
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from 'react-query';
 import { useRecoilValue } from 'recoil';
-import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { filters } from '../atom';
 import { httpGet } from '../util/http';
 import { getFilterQueryString } from '../util/filterQueryString';
-import { getRenderPageIndex } from '../util/getRenderPageIndex';
 import useModal from './useModal';
-import type { CharacterType } from '../types/CharacterType';
-import type { RenderCharacterList, ResponseCharacterList } from '../types/PageType';
-
-const initRenderPageData: RenderCharacterList = {
-  prevPage: [],
-  allRenderList: [],
-};
-
-interface ResponseError {
-  code: string;
-  message: string;
-}
-
-interface PageOption {
-  startPage: number;
-  pageSize: number;
-}
+import useClientFilter from './useClientFilter';
+import type { ResponseCharacterList, PaginationOption, CharacterType } from '../types/PageType';
+import type { ResponseError } from '../types/Error';
 
 const initResponsePageData: ResponseCharacterList = { allResponseList: [], newPage: [] };
 
-function useCharacterFilter(pageSize: number, responsePage: ResponseCharacterList) {
-  const filterList = useRecoilValue(filters);
-  const queryStringFilter = getFilterQueryString(filterList);
-  const [renderPage, setRenderPage] = useState<RenderCharacterList>(initRenderPageData);
-
-  const setNewRenderPage = (render: CharacterType[]) => {
-    const pageIndex = getRenderPageIndex(render.length, pageSize, responsePage.newPage.length);
-    setRenderPage({
-      ...renderPage,
-      allRenderList: render.slice(0, pageIndex.renderPageIndex),
-      prevPage: render.slice(pageIndex.renderPageIndex, pageIndex.totalLength),
-    });
-  };
-
-  useEffect(() => {
-    if (filterList.noTvSeries.clicked) {
-      const render = [
-        ...renderPage.allRenderList,
-        ...renderPage.prevPage,
-        ...responsePage.newPage.filter((character) => character.tvSeries.join('').length === 0),
-      ];
-      setNewRenderPage(render);
-      return;
-    }
-    setRenderPage({ ...renderPage, allRenderList: [...responsePage.allResponseList] });
-  }, [responsePage, filterList]);
-
-  useEffect(() => {
-    if (filterList.noTvSeries.clicked) {
-      const render = responsePage.allResponseList.filter((character) => character.tvSeries.join('').length === 0);
-      setNewRenderPage(render);
-    }
-  }, [filterList.noTvSeries.clicked]);
-  return { queryStringFilter, renderPage: renderPage.allRenderList, setRenderPage };
-}
-
-function useFetchPage(url: string, option: PageOption) {
-  const queryClient = useQueryClient();
+function useFetchPage(url: string, option: PaginationOption) {
   const navigate = useNavigate();
   const { setContent, closeModal } = useModal();
+  const queryClient = useQueryClient();
+  const filterList = useRecoilValue(filters);
+  const [queryStringFilter, setQueryStringFilter] = useState(getFilterQueryString(filterList));
+  const [startPage, setStartPage] = useState<number>(option.startPage);
   const [responsePage, setResponsePage] = useState<ResponseCharacterList>(initResponsePageData);
-  const { queryStringFilter, renderPage, setRenderPage } = useCharacterFilter(option.pageSize, responsePage);
-  const getPageData = async ({ pageParam = option.startPage }) => {
+  const { renderPage } = useClientFilter(option, responsePage, filterList);
+
+  const fetchPage = async ({ pageParam = startPage }) => {
     const response: CharacterType[] = await httpGet(
       `${url}?${queryStringFilter}page=${pageParam}&pageSize=${option.pageSize}`
     );
@@ -78,6 +31,7 @@ function useFetchPage(url: string, option: PageOption) {
       currentPage: pageParam,
     };
   };
+
   const fetchErrorHandler = (error: ResponseError) => {
     setContent(`ERROR: ${error.message}`, [
       {
@@ -89,20 +43,22 @@ function useFetchPage(url: string, option: PageOption) {
       },
     ]);
   };
+
   const fetchSuccessHandler = (pages: { responseList: CharacterType[]; currentPage: number }[]) => {
     const newPage = pages.at(-1);
     if (newPage) {
+      const allList: CharacterType[] = [];
       setResponsePage({
         ...responsePage,
         newPage: newPage.responseList,
-        allResponseList: [...responsePage.allResponseList, ...newPage.responseList],
+        allResponseList: allList.concat(...pages.map((page) => page.responseList)),
       });
     }
   };
 
   const { fetchNextPage, isLoading, hasNextPage, isFetching } = useInfiniteQuery(
     ['characters', queryStringFilter],
-    getPageData,
+    fetchPage,
     {
       refetchOnWindowFocus: true,
       staleTime: 3 * 60 * 1000,
@@ -116,16 +72,17 @@ function useFetchPage(url: string, option: PageOption) {
     }
   );
 
+  /** 필터 변경시 초기화 로직 */
   useEffect(() => {
     queryClient.invalidateQueries(['characters', queryStringFilter]);
+    setStartPage(option.startPage);
     setResponsePage({ allResponseList: [], newPage: [] });
-    setRenderPage({ allRenderList: [], prevPage: [] });
-  }, [queryStringFilter]);
-
+    setQueryStringFilter(getFilterQueryString(filterList));
+  }, [filterList]);
   return { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching };
 }
 
-export default function usePaginator(url: string, option: PageOption) {
+export default function usePaginator(url: string, option: PaginationOption) {
   const observer = useRef<IntersectionObserver>();
   const { isLoading, renderPage, fetchNextPage, hasNextPage, isFetching } = useFetchPage(url, option);
 

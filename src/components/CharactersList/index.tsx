@@ -5,7 +5,7 @@ import { bodyFont } from '../../styles/mixin';
 import Character from './Character';
 import Loading from '../Loading';
 import usePaginator from '../../hooks/usePaginator';
-import type { CharacterType } from '../../types/CharacterType';
+import type { CharacterType } from '../../types/PageType';
 
 const getStartPage = () => {
   const pageQuery = queryString.parse(window.location.search);

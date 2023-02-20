@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { MiddleButton } from '../../../styles/common';
 import useModal from '../../../hooks/useModal';
-import type { CharacterType } from '../../../types/CharacterType';
+import type { CharacterType } from '../../../types/PageType';
 
 export default function Character({ detail }: { detail: CharacterType }) {
   const { setContent, closeModal } = useModal();
@@ -35,7 +35,7 @@ export default function Character({ detail }: { detail: CharacterType }) {
           <span>books: {detail.books.length}</span>
           <span>tvSeries: {detail.tvSeries.filter((tv) => tv !== '').length}</span>
         </InfoLine>
-        <InfoLine>gender: {detail.died}</InfoLine>
+        <InfoLine>gender: {detail.gender}</InfoLine>
       </Info>
       <Delete>
         <MiddleButton onClick={clickDeleteHandler}>삭제</MiddleButton>
