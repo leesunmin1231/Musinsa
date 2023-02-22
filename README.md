@@ -1,46 +1,22 @@
-# Getting Started with Create React App
+# 무신사 과제
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 실행 방법
 
-## Available Scripts
+npm start
 
-In the project directory, you can run:
+## 고민 사항
 
-### `npm start`
+- filter 적용 과정에서 여자 캐릭터인 경우, 생존 인물의 경우 api 요청에서 쿼리 스트링을 통해 받아올 때 필터링이 가능하나, 그외 조건 (tvSeries 유무)은 api 요청 자체에서 필터링이 안된다.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- 받아온 응답 데이터를 바탕으로 클라이언트에서 다시 필터링을 해주어야하는데, 이럴 경우, 리렌더링이 발생하며 성능에 좋지 않고, 10개씩 데이터가 늘어날 것이라는 것을 보장 할 수 없다.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+  - 데이터 10개씩 받아옴
+  - 데이터 리스트 바탕으로 필터링
+  - 리스트 목록 개수 감소
+  - 다음 페이지 또 다시 api 요청 해야함.
 
-### `npm test`
+- fetch api만 사용하여 구현하게 되면 api 요청 수가 너무 많아지게 된다.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 해결 방법
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- react query를 사용하여 서버 데이터를 캐싱하자.
